@@ -23,6 +23,21 @@ func readURL(url string) ([]byte, error) {
 	return content, err
 }
 
+func runCommand(cmdStr string) ([]byte, error) {
+	cmd := exec.Command("bash", "-c", cmdStr)
+	return cmd.Output()
+}
+
+func trimRADBOutput(out string) []string {
+	lines := strings.Split(out, "\n")
+
+	if len(lines) > 1 {
+		return strings.Split(lines[1], " ")
+	}
+
+	return nil
+}
+
 func fetchAWS() []string {
 	// Fetch IP ranges
 	url := "https://ip-ranges.amazonaws.com/ip-ranges.json"
@@ -76,18 +91,22 @@ func fetchDomain(domain string) net.IP {
 	return in.Answer[0].(*dns.A).A
 }
 
-func fetchASN(asn string) []string {
-	cmd := exec.Command("bash", "-c", fmt.Sprintf("whois -h whois.radb.net '!g%s'", asn))
-	out, err := cmd.CombinedOutput()
+// Query ASN information from radb.
+// See: http://www.radb.net/support/query2.php
+func fetchCompany(company string) []string {
+	out, err := runCommand(fmt.Sprintf("whois -h whois.radb.net '!i%s,1'", company))
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	lines := strings.Split(string(out), "\n")
+	return trimRADBOutput(string(out))
+}
 
-	if len(lines) > 1 {
-		return strings.Split(lines[1], " ")
+func fetchASN(asn string) []string {
+	out, err := runCommand(fmt.Sprintf("whois -h whois.radb.net '!g%s'", asn))
+	if err != nil {
+		log.Fatal(err)
 	}
 
-	return nil
+	return trimRADBOutput(string(out))
 }

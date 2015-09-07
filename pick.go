@@ -31,5 +31,5 @@ func main() {
 	// 	fmt.Println(r)
 	// }
 
-	fmt.Println(fetchASN("AS6432"))
+	fmt.Println(fetchCompany("AS-GOOGLE"))
 }
