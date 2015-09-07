@@ -2,10 +2,12 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net"
 	"net/http"
+	"os/exec"
 	"strings"
 
 	"github.com/miekg/dns"
@@ -72,4 +74,20 @@ func fetchDomain(domain string) net.IP {
 	}
 
 	return in.Answer[0].(*dns.A).A
+}
+
+func fetchASN(asn string) []string {
+	cmd := exec.Command("bash", "-c", fmt.Sprintf("whois -h whois.radb.net '!g%s'", asn))
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	lines := strings.Split(string(out), "\n")
+
+	if len(lines) > 1 {
+		return strings.Split(lines[1], " ")
+	}
+
+	return nil
 }

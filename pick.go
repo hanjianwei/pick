@@ -5,7 +5,7 @@ import (
 	"fmt"
 )
 
-const AppVersion = "0.1.0"
+const appVersion = "0.1.0"
 
 func main() {
 	version := flag.Bool("v", false, "Print version")
@@ -16,7 +16,7 @@ func main() {
 	flag.Parse()
 
 	if *version {
-		fmt.Println(AppVersion)
+		fmt.Println(appVersion)
 	} else if *refresh {
 		fmt.Println("Refresh")
 	}
@@ -31,5 +31,5 @@ func main() {
 	// 	fmt.Println(r)
 	// }
 
-	fetchDomain("twitter.com.")
+	fmt.Println(fetchASN("AS6432"))
 }
