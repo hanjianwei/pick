@@ -24,4 +24,6 @@ func main() {
 	fmt.Println("Config file:", *config)
 
 	fmt.Println("Platform:", *output)
+
+	fetch_aws()
 }
