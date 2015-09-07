@@ -25,5 +25,11 @@ func main() {
 
 	fmt.Println("Platform:", *output)
 
-	fetch_aws()
+	// ipRanges := fetchAws()
+
+	// for _, r := range(ipRanges) {
+	// 	fmt.Println(r)
+	// }
+
+	fetchDomain("twitter.com.")
 }
