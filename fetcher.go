@@ -38,7 +38,20 @@ func trimRADBOutput(out string) []string {
 	return nil
 }
 
-func fetchAWS() []string {
+func parseIPNets(ipstrs []string) []*net.IPNet {
+	ipnets := make([]*net.IPNet, len(ipstrs))
+	for i, s := range ipstrs {
+		_, ipnet, err := net.ParseCIDR(s)
+		if err != nil {
+			log.Fatal(err)
+		}
+		ipnets[i] = ipnet
+	}
+
+	return ipnets
+}
+
+func fetchAWS() []*net.IPNet {
 	// Fetch IP ranges
 	url := "https://ip-ranges.amazonaws.com/ip-ranges.json"
 	content, err := readURL(url)
@@ -61,25 +74,27 @@ func fetchAWS() []string {
 	}
 
 	// Extract IP ranges
-	inets := make([]string, len(res.Prefixes))
-	for i, inet := range res.Prefixes {
-		inets[i] = inet.IPPrefix
+	var ipstrs []string
+	for _, prefix := range res.Prefixes {
+		if strings.HasPrefix(prefix.Region, "cn-") {
+			ipstrs = append(ipstrs, prefix.IPPrefix)
+		}
 	}
 
-	return inets
+	return parseIPNets(ipstrs)
 }
 
-func fetchCF() []string {
+func fetchCF() []*net.IPNet {
 	url := "https://www.cloudflare.com/ips-v4"
 	content, err := readURL(url)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	return strings.Split(string(content), "\n")
+	return parseIPNets(strings.Split(string(content), "\n"))
 }
 
-func fetchDomain(domain string) net.IP {
+func fetchDomain(domain string) []net.IP {
 	m := new(dns.Msg)
 	m.SetQuestion(domain, dns.TypeA)
 
@@ -88,12 +103,17 @@ func fetchDomain(domain string) net.IP {
 		log.Fatal(err)
 	}
 
-	return in.Answer[0].(*dns.A).A
+	ips := make([]net.IP, len(in.Answer))
+	for i, a := range in.Answer {
+		ips[i] = a.(*dns.A).A
+	}
+
+	return ips
 }
 
 // Query ASN information from radb.
 // See: http://www.radb.net/support/query2.php
-func fetchCompany(company string) []string {
+func fetchCompanyASNs(company string) []string {
 	out, err := runCommand(fmt.Sprintf("whois -h whois.radb.net '!i%s,1'", company))
 	if err != nil {
 		log.Fatal(err)
@@ -102,11 +122,11 @@ func fetchCompany(company string) []string {
 	return trimRADBOutput(string(out))
 }
 
-func fetchASN(asn string) []string {
+func fetchASN(asn string) []*net.IPNet {
 	out, err := runCommand(fmt.Sprintf("whois -h whois.radb.net '!g%s'", asn))
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	return trimRADBOutput(string(out))
+	return parseIPNets(trimRADBOutput(string(out)))
 }
