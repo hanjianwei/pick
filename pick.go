@@ -3,6 +3,9 @@ package main
 import (
 	"flag"
 	"fmt"
+	"net"
+
+	"github.com/hanjianwei/pick/netutils"
 )
 
 const appVersion = "0.1.0"
@@ -25,11 +28,15 @@ func main() {
 
 	fmt.Println("Platform:", *output)
 
-	// ipRanges := fetchAws()
+	ip1 := net.IPv4(192, 168, 0, 0)
+	ip2 := net.IPv4(192, 168, 0, 255)
+	d := netutils.IPDistance(ip2, ip1)
+	f := netutils.IPDistance(ip1, ip2)
 
-	// for _, r := range(ipRanges) {
-	// 	fmt.Println(r)
-	// }
+	fmt.Println(d)
+	fmt.Println(f)
 
-	fmt.Println(fetchCompanyASNs("AS-GOOGLE"))
+	//
+	// ipr.addIPNet(ip1)
+	// ipr.addIPNet(ip2)
 }
