@@ -8,10 +8,10 @@ import (
 const appVersion = "0.1.0"
 
 func main() {
-	version := flag.Bool("v", false, "Print version")
-	refresh := flag.Bool("r", false, "Refresh ip ranges")
-	config := flag.String("c", "config.json", "Config file")
-	output := flag.String("t", "ros", "Specifies the output platform")
+	version := flag.Bool("v", false, "print version")
+	refresh := flag.Bool("r", false, "refresh ip ranges")
+	config := flag.String("c", "config.json", "config file")
+	output := flag.String("t", "ros", "specifies the output platform")
 
 	flag.Parse()
 
@@ -22,6 +22,5 @@ func main() {
 	}
 
 	fmt.Println("Config file:", *config)
-
 	fmt.Println("Platform:", *output)
 }
